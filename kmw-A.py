@@ -22,7 +22,7 @@ class Sample:
     
 
 #Path to data files
-path = './kmw-samples'
+path = '../kmw-samples'
 all_files = glob.glob(path + "/*.csv")
 
 dict = {}
@@ -65,17 +65,17 @@ for key in keySort:
         list_val = ['', smpl.pc, smpl.sn, smpl.rt]
         row_list.append(list_val)
 
-with open('kmw-data-scrape.csv', 'w', newline='') as file:
+with open('../output/kmw-data-scrape.csv', 'w', newline='') as file:
     writer = csv.writer(file)
     writer.writerows(row_list)
 
 file.close()
 
 # Reading the csv file
-df_new = pd.read_csv('kmw-data-scrape.csv')
+df_new = pd.read_csv('../output/kmw-data-scrape.csv')
  
 # saving xlsx file
-GFG = pd.ExcelWriter('kmw-data-scrape.xlsx')
+GFG = pd.ExcelWriter('../output/kmw-data-scrape.xlsx')
 df_new.to_excel(GFG, index=False)
  
 GFG._save()
