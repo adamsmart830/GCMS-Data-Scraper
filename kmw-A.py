@@ -5,6 +5,7 @@ from collections import UserList
 
 
 #Class to hold information regarding a specific peak
+#################################################################
 class Sample:
     def __init__(self, _pc, _sn, _rt):
         self.pc = _pc
@@ -19,45 +20,42 @@ class Sample:
     
     def getRT(self):
         return self.rt
-    
+#################################################################
 
-#Path to data files
-path = '../kmw-samples'
-all_files = glob.glob(path + "/*.csv")
 
-dict = {}
 
 #Data scrape section
 ##################################################################
-for files in all_files:
-    with open(files, 'r', encoding = "ISO-8859-1") as file:
-        csvreader = csv.reader(file)
-        lineCt = 0
-        fileName = ""
-        for row in csvreader:
-            if(lineCt == 2):
-                fileName = row[0][9:20]
-            if(lineCt > 4 and row[12] != ""):
-                sample = Sample(row[10], fileName, row[1])
-                #list = [fileName, row[1], row[10]]
-                if(dict.get(row[12]) == None):
-                    dict[row[12]] = []
-                dict[row[12]].append(sample)
-            lineCt+=1
+def dataScrape(all_files, dict, sample_array):
+    for files in all_files:
+        with open(files, 'r', encoding = "ISO-8859-1") as file:
+            csvreader = csv.reader(file)
+            lineCt = 0
+            fileName = ""
+            for row in csvreader:
+                if(lineCt == 2):
+                    fileName = row[0][9:20]
+                if(lineCt > 4 and row[12] != ""):
+                    sample = Sample(row[10], fileName, row[1])
+                    #list = [fileName, row[1], row[10]]
+                    if(dict.get(row[12]) == None):
+                        dict[row[12]] = []
+                    dict[row[12]].append(sample)
+                    sample_array.append(sample)
+                lineCt+=1
 ###################################################################
 
 
-#Sort Dicitonary by length of value array              
-keySort = [k for k, v in sorted(dict.items(), key=lambda item: len(item[1]))]
-keySort.reverse()
+#Sort Dicitonary by length of value array
+def kSort(dict, keySort):         
+    keySort = [k for k, v in sorted(dict.items(), key=lambda item: len(item[1]))]
+    return keySort.reverse()
 
 
 #print(keySort)
 
-ui = input("Enter Program (A/B/C):")
-ui = ui.lower()
 
-if(ui == 'a' or ui == 'c'):
+def kmw_A(dict, keySort):
     row_list = [["CAS ID", "Proposed Compound", "Found In Sample:", "At Retention Time"]]
 
     for key in keySort:
@@ -83,9 +81,24 @@ if(ui == 'a' or ui == 'c'):
     
     GFG._save()
 
-    #print(row_list)
-if(ui == 'b' or ui == 'c'):
+    #print(row_list)  print("Hello World")
+
+def kmw_B(dict, keySort, sample_array):
     rt_dict = {}
+    getSTDevDict(dict, keySort, rt_dict)
+    parseData(rt_dict, sample_array)
+
+
+def parseData(rt_dict, sample_array):
+    rt_dict = dict(sorted(rt_dict.items(), key=lambda item:item[0]))
+    keysList = list(rt_dict.keys())
+    print(keysList)
+
+        
+
+
+
+def getSTDevDict(dict, keySort, rt_dict):
     for key in keySort:
         ct = 0
         avg_rt = 0
@@ -108,10 +121,44 @@ if(ui == 'b' or ui == 'c'):
         abs_rt_l = abs(low - avg_rt)
         std_dev = max(abs_rt_h, abs_rt_l, 0.01)
         rt_dict[avg_rt] = std_dev
-    
+
     print(rt_dict)
 
 
+def main():
+    
+    # Path to data files
+    path = '../kmw-samples'
+    all_files = glob.glob(path + "/*.csv")
+    dict = {}
+    sample_array = []
+
+    # Populate Dictionary
+    dataScrape(all_files, dict, sample_array)
+
+    # Sort Dict Keys
+    keySort = [k for k, v in sorted(dict.items(), key=lambda item: len(item[1]))]
+    keySort.reverse()
+
+    # Grab User Input (ui)
+    ui = input("Enter Program (A/B/C):")
+    ui = ui.lower()
+
+    # Program selection
+    if(ui == 'a'):
+        kmw_A(dict, keySort)
+    elif(ui == 'b'):
+        kmw_B(dict, keySort, sample_array)
+
+
+
+
+
+
+
+
+if __name__ == "__main__":
+    main()
 
 
     
