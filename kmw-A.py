@@ -54,34 +54,64 @@ keySort.reverse()
 
 #print(keySort)
 
+ui = input("Enter Program (A/B/C):")
+ui = ui.lower()
 
-row_list = [["CAS ID", "Proposed Compound", "Found In Sample:", "At Retention Time"]]
+if(ui == 'a' or ui == 'c'):
+    row_list = [["CAS ID", "Proposed Compound", "Found In Sample:", "At Retention Time"]]
 
-for key in keySort:
-    list_val = [key, "", "", ""]
-    row_list.append(list_val) 
+    for key in keySort:
+        list_val = [key, "", "", ""]
+        row_list.append(list_val) 
 
-    for smpl in dict[key]:
-        list_val = ['', smpl.pc, smpl.sn, smpl.rt]
-        row_list.append(list_val)
+        for smpl in dict[key]:
+            list_val = ['', smpl.pc, smpl.sn, smpl.rt]
+            row_list.append(list_val)
 
-with open('../output/kmw-data-scrape.csv', 'w', newline='') as file:
-    writer = csv.writer(file)
-    writer.writerows(row_list)
+    with open('../output/kmw-data-scrape.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerows(row_list)
 
-file.close()
+    file.close()
 
-# Reading the csv file
-df_new = pd.read_csv('../output/kmw-data-scrape.csv')
- 
-# saving xlsx file
-GFG = pd.ExcelWriter('../output/kmw-data-scrape.xlsx')
-df_new.to_excel(GFG, index=False)
- 
-GFG._save()
-
-#print(row_list)
-
+    # Reading the csv file
+    df_new = pd.read_csv('../output/kmw-data-scrape.csv')
     
+    # saving xlsx file
+    GFG = pd.ExcelWriter('../output/kmw-data-scrape.xlsx')
+    df_new.to_excel(GFG, index=False)
+    
+    GFG._save()
+
+    #print(row_list)
+if(ui == 'b' or ui == 'c'):
+    rt_dict = {}
+    for key in keySort:
+        ct = 0
+        avg_rt = 0
+        low = 0
+        high = 0
+        for sample in dict[key]:
+            sample_rt = float(sample.rt)
+            if ct == 0:
+                low = sample_rt
+                high = sample_rt
+            else:
+                if(low > sample_rt):
+                    low = sample_rt
+                if(high < sample_rt):
+                    high = sample_rt
+            avg_rt += sample_rt
+            ct+=1
+        avg_rt = avg_rt / ct
+        abs_rt_h = abs(high - avg_rt)
+        abs_rt_l = abs(low - avg_rt)
+        std_dev = max(abs_rt_h, abs_rt_l, 0.01)
+        rt_dict[avg_rt] = std_dev
+    
+    print(rt_dict)
+
+
+
 
     
